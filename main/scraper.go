@@ -41,19 +41,26 @@ func setupWebsitesStruct() []website {
 	s = append(s, website{"Dealabs", "https://www.dealabs.com/hot?page=1", "https://www.dealabs.com/nouveaux?page=1", cssClass{}})
 	s = append(s, website{"Hot UK Dealz", "https://www.hotukdeals.com/hot?page=1", "https://www.hotukdeals.com/new?page=1", cssClass{}})
 	s = append(s, website{"MyDealz", "https://www.mydealz.de/hot?page=1", "https://www.mydealz.de/new?page=1", cssClass{}})
-	s = append(s, website{"Pepper NL", "https://nl.pepper.com/?page=1", "https://nl.pepper.com/nieuw?page=1", cssClass{}})
-	s = append(s, website{"Chollometro", "https://www.chollometro.com/populares?page=1", "https://www.chollometro.com/nuevos?page=1", cssClass{}})
+	//s = append(s, website{"Pepper NL", "https://nl.pepper.com/?page=1", "https://nl.pepper.com/nieuw?page=1", cssClass{}})
+	//s = append(s, website{"Chollometro", "https://www.chollometro.com/populares?page=1", "https://www.chollometro.com/nuevos?page=1", cssClass{}})
 
 	return s
 }
 
-//TODO change to use the website struct
-func scrape_website(website string) {
+// TODO change to use the website struct
+// TODO use emoji
+func scrape_website(website website, hot bool) []article {
 	soup.SetDebug(true)
 	soup.Headers["user-agent"] = USER_AGENT_HEADER
+	url := ""
+	fmt.Println("Scrapping website " + website.title)
+	if hot {
+		url = website.hotUrl
+	} else {
+		url = website.newUrl
+	}
 
-	fmt.Println("Scrapping website " + website)
-	resp, err := soup.Get(website)
+	resp, err := soup.Get(url)
 	if err != nil {
 		fmt.Println("Error, killing the process", err)
 		os.Exit(1)
@@ -90,6 +97,7 @@ func scrape_website(website string) {
 			articlesToSend = append(articlesToSend, createdArticle)
 		}
 	}
+	return articlesToSend
 }
 
 func scrape_wanted() {
