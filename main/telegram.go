@@ -2,6 +2,8 @@ package main
 
 import (
 	"log"
+	"regexp"
+	"strings"
 	"time"
 
 	tb "gopkg.in/tucnak/telebot.v2"
@@ -10,8 +12,6 @@ import (
 
 // TODO handler add alert
 // TODO handler remove alert
-// TODO handler get instant hot deal
-// TODO handler get instant news deal
 
 func scrapeByType(category string, websites []website, bot *tb.Bot, recipient tb.Recipient) {
 	for _, website := range websites {
@@ -33,6 +33,16 @@ func sendMessageByArticle(bot *tb.Bot, recipient tb.Recipient, articles []articl
 	}
 }
 
+func handleAddAlert(m *tb.Message) {
+	regexAdd, _ := regexp.Compile("/add ");
+	alertsToAdd := regexAdd.ReplaceAllString(m.Text, "")
+	alerts := strings.Split(alertsToAdd, " ")
+	for _, alert := range alerts {
+		addAlertToFile([]byte(alert + "\n"))
+	}
+
+}
+
 func main() {
 	websites := setupWebsitesStruct()
 
@@ -48,7 +58,6 @@ func main() {
 		return
 	}
 
-
 	b.Handle("/hot", func(m *tb.Message) {
 		scrapeByType("hot", websites, b, &chat)
 	})
@@ -57,12 +66,7 @@ func main() {
 		scrapeByType("new", websites, b, &chat)
 	})
 
-	//articles := scrape_website("https://www.dealabs.com/hot?page=1")
-
-
-	//for _, article := range articles {
-	//	sendMessage(b, &chat, article.title + " | " + "URL : " + article.url)
-	//}
+	b.Handle("/add", handleAddAlert)
 
 	b.Start()
 }
