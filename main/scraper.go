@@ -30,7 +30,7 @@ type article struct {
 	id				string
 	title			string
 	picture			string
-	temperature 	int
+	temperature 	string
 	url 			string
 }
 
@@ -39,8 +39,8 @@ func setupWebsitesStruct() []website {
 	s := []website{}
 
 	s = append(s, website{"Dealabs", "https://www.dealabs.com/hot?page=1", "https://www.dealabs.com/nouveaux?page=1", cssClass{}})
-	s = append(s, website{"Hot UK Dealz", "https://www.hotukdeals.com/hot?page=1", "https://www.hotukdeals.com/new?page=1", cssClass{}})
-	s = append(s, website{"MyDealz", "https://www.mydealz.de/hot?page=1", "https://www.mydealz.de/new?page=1", cssClass{}})
+	//s = append(s, website{"Hot UK Dealz", "https://www.hotukdeals.com/hot?page=1", "https://www.hotukdeals.com/new?page=1", cssClass{}})
+	//s = append(s, website{"MyDealz", "https://www.mydealz.de/hot?page=1", "https://www.mydealz.de/new?page=1", cssClass{}})
 	//s = append(s, website{"Pepper NL", "https://nl.pepper.com/?page=1", "https://nl.pepper.com/nieuw?page=1", cssClass{}})
 	//s = append(s, website{"Chollometro", "https://www.chollometro.com/populares?page=1", "https://www.chollometro.com/nuevos?page=1", cssClass{}})
 
@@ -48,9 +48,7 @@ func setupWebsitesStruct() []website {
 }
 
 // TODO change to use the website struct
-// TODO use emoji
 func scrape_website(website website, hot bool) []article {
-	soup.SetDebug(true)
 	soup.Headers["user-agent"] = USER_AGENT_HEADER
 	url := ""
 	fmt.Println("Scrapping website " + website.title)
@@ -71,7 +69,7 @@ func scrape_website(website website, hot bool) []article {
 	articles := doc.FindAll("article")
 	articlesLen := len(articles)
 	if articles == nil || articlesLen == 0 {
-		fmt.Print("Aucun article trouvé. Changement de la page ?")
+		fmt.Print("No article found. The page has changed ?")
 	} else {
 		fmt.Printf("Found %d articles.\n", articlesLen)
 	}
@@ -79,27 +77,45 @@ func scrape_website(website website, hot bool) []article {
 	articlesToSend := []article{}
 	for _, item := range articles {
 		articleId := item.Attrs()["id"]
+		var createdArticle *article = &article{articleId, "", "", "", ""}
 		if regexThread.MatchString(articleId) {
-			// TODO class doesn't work for pepper and chollometro
-			// TODO Adjust it by creating a map who will be able to give the good class attributes for a specific site
-			// TODO struct
-			//infoHeader := item.Find("div", "class", "threadGrid-headerMeta").FindStrict("div", "class", "flex")
+			scrape_titleAndUrl(item, createdArticle)
+			scrape_temperature(item, createdArticle)
+			scrape_picture(item, createdArticle)
 
-			// TODO : scrap temperature
-
-			// TODO : scrap picture
-
-			infoTitle := item.Find("div", "class", "threadGrid-title").Find("strong", "class", "thread-title")
-			a := infoTitle.Find("a")
-			title := strings.TrimSpace(a.Text());
-			url := strings.TrimSpace(a.Attrs()["href"])
-			createdArticle := article{articleId, title, "", 1, url}
-			articlesToSend = append(articlesToSend, createdArticle)
+			articlesToSend = append(articlesToSend, *createdArticle)
 		}
 	}
 	return articlesToSend
 }
 
+func scrape_temperature(item soup.Root, article *article) {
+	// TODO change class by websites
+	infoTemperature := item.Find("div", "class", "threadGrid-headerMeta").FindAll("span")
+	regexThread, _ := regexp.Compile("cept-vote-temp vote-temp [A-Za-z\\s\\-]*");
+	for _, DOMElement := range infoTemperature {
+		if regexThread.MatchString(DOMElement.Attrs()["class"]) {
+			article.temperature = strings.TrimSpace(DOMElement.Text())
+		}
+	}
+}
+
+func scrape_picture(item soup.Root, article *article) {
+
+}
+
+func scrape_titleAndUrl(item soup.Root, article *article) {
+	// TODO change class by websites
+	infoTitle := item.Find("div", "class", "threadGrid-title").Find("strong", "class", "thread-title")
+	a := infoTitle.Find("a")
+	title := strings.TrimSpace(a.Text());
+	url := strings.TrimSpace(a.Attrs()["href"])
+	article.title = title
+	article.url = url
+}
+
+
+// TODO scrape by alert wanted
 func scrape_wanted() {
 	// TODO We create a file in a specific folder which will store every keywords we want as alerts
 	// TODO and then we will use the scraping function we the keywords associated in this file on the title

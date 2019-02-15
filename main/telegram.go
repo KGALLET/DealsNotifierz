@@ -9,9 +9,8 @@ import (
 	tb "gopkg.in/tucnak/telebot.v2"
 )
 
-
-// TODO handler add alert
-// TODO handler remove alert
+// TODO mise en page du message
+// TODO use emoji
 
 func scrapeByType(category string, websites []website, bot *tb.Bot, recipient tb.Recipient) {
 	for _, website := range websites {
@@ -21,9 +20,13 @@ func scrapeByType(category string, websites []website, bot *tb.Bot, recipient tb
 		}  else {
 			articles = scrape_website(website, false)
 		}
-		sendMessageByArticle(bot, recipient, articles)
+
+		for _, article := range articles {
+			displayArticle(article)
+		}
+		/*sendMessageByArticle(bot, recipient, articles)
 		bot.Send(recipient, "================================================================================" +
-								  "================================================================================")
+								  "================================================================================")*/
 	}
 }
 
@@ -40,7 +43,13 @@ func handleAddAlert(m *tb.Message) {
 	for _, alert := range alerts {
 		addAlertToFile([]byte(alert + "\n"))
 	}
+}
 
+func handleRemoveAlert(m *tb.Message) {
+	regexAdd, _ := regexp.Compile("/del ");
+	alertsToRemove := regexAdd.ReplaceAllString(m.Text, "")
+	alerts := strings.Split(alertsToRemove, " ")
+	removeAlertFromFile(alerts)
 }
 
 func main() {
@@ -52,21 +61,22 @@ func main() {
 	})
 	chat := tb.Chat{ID: 726888126}
 
-
 	if err != nil {
 		log.Fatal(err)
 		return
 	}
 
+	// Handlers
 	b.Handle("/hot", func(m *tb.Message) {
 		scrapeByType("hot", websites, b, &chat)
 	})
-
 	b.Handle("/new", func(m *tb.Message) {
 		scrapeByType("new", websites, b, &chat)
 	})
-
 	b.Handle("/add", handleAddAlert)
+	b.Handle("/del", handleRemoveAlert)
+
+	scrapeByType("hot", websites, b, &chat)
 
 	b.Start()
 }
