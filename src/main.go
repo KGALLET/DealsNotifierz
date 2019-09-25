@@ -1,10 +1,29 @@
 package main
 
 import (
+	tb "gopkg.in/tucnak/telebot.v2"
 	"log"
 	"time"
-	tb "gopkg.in/tucnak/telebot.v2"
 )
+
+func setupWebsitesStruct() []website {
+	websites := []website{}
+	pepperChollometroCSS := cssClass{};
+	pepperChollometroCSS.classTitle = "threadCardLayout--row--medium"
+	pepperChollometroCSS.classTemperature = "threadCardLayout--row--large"
+
+	dealabsHotUKMyDealz := cssClass{};
+	dealabsHotUKMyDealz.classTitle = "threadGrid-title"
+	dealabsHotUKMyDealz.classTemperature = "threadGrid-headerMeta"
+
+	websites = append(websites, website{"Dealabs", "https://www.dealabs.com/hot?page=1", "https://www.dealabs.com/nouveaux?page=1", dealabsHotUKMyDealz})
+	websites = append(websites, website{"Hot UK Dealz", "https://www.hotukdeals.com/hot?page=1", "https://www.hotukdeals.com/new?page=1", dealabsHotUKMyDealz})
+	websites = append(websites, website{"MyDealz", "https://www.mydealz.de/hot?page=1", "https://www.mydealz.de/new?page=1", dealabsHotUKMyDealz})
+	websites = append(websites, website{"Pepper NL", "https://nl.pepper.com/?page=1", "https://nl.pepper.com/nieuw?page=1", pepperChollometroCSS})
+	websites = append(websites, website{"Chollometro", "https://www.chollometro.com/populares?page=1", "https://www.chollometro.com/nuevos?page=1", pepperChollometroCSS})
+
+	return websites
+}
 
 func main() {
 	websites := setupWebsitesStruct()

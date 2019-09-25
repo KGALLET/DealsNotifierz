@@ -1,14 +1,10 @@
 package main
 
 import (
-	"fmt"
 	tb "gopkg.in/tucnak/telebot.v2"
 	"regexp"
 	"strings"
 )
-
-// TODO mise en page du message
-// TODO use emoji
 
 func scrapeByType(category string, websites []website, bot *tb.Bot, recipient tb.Recipient) {
 	for _, website := range websites {
@@ -18,13 +14,13 @@ func scrapeByType(category string, websites []website, bot *tb.Bot, recipient tb
 		}  else {
 			articles = scrape_website(website, false)
 		}
-		fmt.Println(articles)
-/*		for _, article := range articles {
+
+		for _, article := range articles {
 			displayArticle(article)
-		}*/
-		/*sendMessageByArticle(bot, recipient, articles)
-		bot.Send(recipient, "================================================================================" +
-								  "================================================================================")*/
+		}
+		//sendMessageByArticle(bot, recipient, articles)
+		//bot.Send(recipient, "================================================================================" +
+		//						  "================================================================================")
 	}
 }
 

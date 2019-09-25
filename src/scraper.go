@@ -16,7 +16,6 @@ const (
 
 type cssClass struct {
 	classTitle			string
-	classPicture 		string
 	classTemperature	string
 }
 
@@ -34,20 +33,6 @@ type article struct {
 	url 			string
 }
 
-
-func setupWebsitesStruct() []website {
-	s := []website{}
-
-	s = append(s, website{"Dealabs", "https://www.dealabs.com/hot?page=1", "https://www.dealabs.com/nouveaux?page=1", cssClass{}})
-	//s = append(s, website{"Hot UK Dealz", "https://www.hotukdeals.com/hot?page=1", "https://www.hotukdeals.com/new?page=1", cssClass{}})
-	//s = append(s, website{"MyDealz", "https://www.mydealz.de/hot?page=1", "https://www.mydealz.de/new?page=1", cssClass{}})
-	//s = append(s, website{"Pepper NL", "https://nl.pepper.com/?page=1", "https://nl.pepper.com/nieuw?page=1", cssClass{}})
-	//s = append(s, website{"Chollometro", "https://www.chollometro.com/populares?page=1", "https://www.chollometro.com/nuevos?page=1", cssClass{}})
-
-	return s
-}
-
-// TODO change to use the website struct
 func scrape_website(website website, hot bool) []article {
 	soup.Headers["user-agent"] = USER_AGENT_HEADER
 	url := ""
@@ -79,30 +64,37 @@ func scrape_website(website website, hot bool) []article {
 		articleId := item.Attrs()["id"]
 		var createdArticle *article = &article{articleId, "", "", ""}
 		if regexThread.MatchString(articleId) {
-			scrape_titleAndUrl(item, createdArticle)
-			scrape_temperature(item, createdArticle)
-
+			scrape_titleAndUrl(item, createdArticle, website)
+			scrape_temperature(item, createdArticle, website)
 			articlesToSend = append(articlesToSend, *createdArticle)
 		}
 	}
+
 	return articlesToSend
 }
 
-func scrape_titleAndUrl(item soup.Root, article *article) {
-	// TODO change class by websites
-	infoTitle := item.Find("div", "class", "threadGrid-title").Find("strong", "class", "thread-title")
+func scrape_titleAndUrl(item soup.Root, article *article, website website) {
+	infoTitle := item.Find("div", "class", website.cssClasses.classTitle).Find("strong", "class", "thread-title")
+
 	a := infoTitle.Find("a")
-	title := strings.TrimSpace(a.Text());
+
+	// in this case, that mean that this is not an article that we can buy,
+	// but just some ads (for example on pepper.nl)
+	// if we do not catch this error, than segfault
+	if a.Error != nil {
+		return
+	}
+	title := strings.TrimSpace(a.Text())
 	url := strings.TrimSpace(a.Attrs()["href"])
 	article.title = title
 	article.url = url
 }
 
 
-func scrape_temperature(item soup.Root, article *article) {
-	// TODO change class by websites
-	infoTemperature := item.Find("div", "class", "threadGrid-headerMeta").FindAll("span")
-	regexClassTemp, _ := regexp.Compile("cept-vote-temp vote-temp [A-Za-z\\s\\-]*");
+func scrape_temperature(item soup.Root, article *article, website website) {
+	infoTemperature := item.Find("div", "class", website.cssClasses.classTemperature).FindAll("span")
+
+ 	regexClassTemp, _ := regexp.Compile("cept-vote-temp vote-temp [A-Za-z\\s\\-]*");
 	for _, DOMElement := range infoTemperature {
 		if regexClassTemp.MatchString(DOMElement.Attrs()["class"]) {
 			article.temperature = strings.TrimSpace(DOMElement.Text())
@@ -112,13 +104,13 @@ func scrape_temperature(item soup.Root, article *article) {
 
 
 func getWantedArticles() {
-	lines, err := readArticlesFromFile()
-	if err != nil {
-		log.Fatal(err)
-	}
-	for _, line := range lines{
-		fmt.Println(string(line))
-	}
+//	lines, err := readArticlesFromFile()
+//	if err != nil {
+//		log.Fatal(err)
+	//	}
+	//for _, line := range lines{
+	//	fmt.Println(string(line))
+	//}
 }
 
 // TODO scrape by alert wanted
