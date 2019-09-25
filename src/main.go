@@ -1,10 +1,26 @@
 package main
 
 import (
+	"fmt"
 	tb "gopkg.in/tucnak/telebot.v2"
 	"log"
 	"time"
 )
+
+func MinuteTicker() *time.Ticker {
+	c := make(chan time.Time, 30)
+	t := &time.Ticker{C: c}
+	go func() {
+		for {
+			n := time.Now()
+			if n.Second() == 0 {
+				c <- n
+			}
+			time.Sleep(time.Second)
+		}
+	}()
+	return t
+}
 
 func setupWebsitesStruct() []website {
 	websites := []website{}
@@ -39,6 +55,12 @@ func main() {
 		return
 	}
 
+	for n := range MinuteTicker().C {
+		fmt.Println("Starting scrapping wanted at : ", n)
+		scrapeByWanted(websites, b, &chat)
+		fmt.Println("Ending scrapping wanted at : ", n)
+	}
+
 	// Handlers
 	b.Handle("/hot", func(m *tb.Message) {
 		scrapeByType("hot", websites, b, &chat)
@@ -48,9 +70,6 @@ func main() {
 	})
 	b.Handle("/add", handleAddAlert)
 	b.Handle("/del", handleRemoveAlert)
-
-	/*scrapeByType("hot", websites, b, &chat)*/
-	getWantedArticles()
 
 	b.Start()
 }

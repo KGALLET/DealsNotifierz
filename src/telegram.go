@@ -1,10 +1,27 @@
 package main
 
 import (
+	"fmt"
 	tb "gopkg.in/tucnak/telebot.v2"
 	"regexp"
 	"strings"
 )
+
+func scrapeByWanted(websites []website, bot *tb.Bot, recipient tb.Recipient) {
+	fmt.Println("Scrapping for wanted items")
+	wantedArticles := []article{}
+	for _, website := range websites {
+		wantedArticles = scrape_wanted(website)
+	}
+
+	for _, wantedArticle := range wantedArticles {
+		displayArticle(wantedArticle, true)
+	}
+
+	sendMessageByArticle(bot, recipient, wantedArticles)
+	bot.Send(recipient, "================================================================================" +
+		"================================================================================")
+}
 
 func scrapeByType(category string, websites []website, bot *tb.Bot, recipient tb.Recipient) {
 	for _, website := range websites {
@@ -15,12 +32,9 @@ func scrapeByType(category string, websites []website, bot *tb.Bot, recipient tb
 			articles = scrape_website(website, false)
 		}
 
-		for _, article := range articles {
-			displayArticle(article)
-		}
-		//sendMessageByArticle(bot, recipient, articles)
-		//bot.Send(recipient, "================================================================================" +
-		//						  "================================================================================")
+		sendMessageByArticle(bot, recipient, articles)
+		bot.Send(recipient, "================================================================================" +
+								  "================================================================================")
 	}
 }
 

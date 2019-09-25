@@ -12,8 +12,13 @@ const (
 	PATH_TO_WANTED_ARTICLES_FILE string = "wanted.file"
 )
 
-func displayArticle(article article) {
-	fmt.Println(article.id + " | " + article.title + " | " + article.url + " | " + article.temperature)
+func displayArticle(article article, wanted bool) {
+	if wanted {
+		fmt.Println("WANTED " + article.id + " | " + article.title + " | " + article.url + " | " + article.temperature)
+	} else {
+		fmt.Println(article.id + " | " + article.title + " | " + article.url + " | " + article.temperature)
+	}
+
 }
 
 // TODO define the good path
@@ -55,15 +60,12 @@ func removeAlertFromFile(alerts []string) {
 	}
 }
 
-func readArticlesFromFile() {
-	// TODO read file with the wanted articles keyword and return it as an array
-	f,err := ioutil.ReadFile(PATH_TO_WANTED_ARTICLES_FILE)
+func readArticlesFromFile() (lines []string, err error) {
+	data, err := ioutil.ReadFile(PATH_TO_WANTED_ARTICLES_FILE)
 	if err != nil {
 		log.Fatal(err)
+		return
 	}
 
-	str := string(f)
-
-	fmt.Println(str)
-
+	return strings.Split(string(data), "\n"), err
 }

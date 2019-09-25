@@ -103,24 +103,29 @@ func scrape_temperature(item soup.Root, article *article, website website) {
 }
 
 
-func getWantedArticles() {
-//	lines, err := readArticlesFromFile()
-//	if err != nil {
-//		log.Fatal(err)
-	//	}
-	//for _, line := range lines{
-	//	fmt.Println(string(line))
-	//}
+func getWantedArticles() (lines []string){
+	lines, err := readArticlesFromFile()
+	if err != nil {
+		log.Fatal(err)
+	}
+	return lines
 }
 
-// TODO scrape by alert wanted
-func scrape_wanted(alreadyFoundDeals []article, wantedArticles []article ) {
-	// TODO We create a file in a specific folder which will store every keywords we want as alerts
-	// TODO and then we will use the scraping function we the keywords associated in this file on the title
+func scrape_wanted(website website) []article {
+	wantedArticles := []article{}
+	articles := []article{}
+	articles = scrape_website(website, true)
+	itemsWanted := getWantedArticles()
 
+	for _, article := range articles {
+		for _, item := range itemsWanted {
+			if strings.Contains(article.title, item) {
+				wantedArticles = append(wantedArticles, article)
+			}
+		}
+	}
 
-
-
+	return wantedArticles
 }
 
 
