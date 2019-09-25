@@ -11,7 +11,10 @@ func scrapeByWanted(websites []website, bot *tb.Bot, recipient tb.Recipient) {
 	fmt.Println("Scrapping for wanted items")
 	wantedArticles := []article{}
 	for _, website := range websites {
-		wantedArticles = scrape_wanted(website)
+		scrappedArticles := scrape_wanted(website)
+		if (len(scrappedArticles) != 0) {
+			wantedArticles = append(wantedArticles, scrappedArticles...)
+		}
 	}
 
 	for _, wantedArticle := range wantedArticles {
@@ -19,8 +22,7 @@ func scrapeByWanted(websites []website, bot *tb.Bot, recipient tb.Recipient) {
 	}
 
 	sendMessageByArticle(bot, recipient, wantedArticles)
-	bot.Send(recipient, "================================================================================" +
-		"================================================================================")
+	bot.Send(recipient, "New(s) wanted articles scrapped :D")
 }
 
 func scrapeByType(category string, websites []website, bot *tb.Bot, recipient tb.Recipient) {

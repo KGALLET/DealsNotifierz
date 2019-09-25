@@ -22,6 +22,7 @@ func displayArticle(article article, wanted bool) {
 }
 
 // TODO define the good path
+// TODO use it
 func addAlertToFile(alert []byte) {
 	f, err := os.OpenFile(PATH_TO_WANTED_ARTICLES_FILE, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
@@ -35,7 +36,6 @@ func addAlertToFile(alert []byte) {
 	}
 }
 
-// TODO define the good path
 func removeAlertFromFile(alerts []string) {
 	f,err := ioutil.ReadFile(PATH_TO_WANTED_ARTICLES_FILE)
 	if err != nil {
@@ -52,7 +52,6 @@ func removeAlertFromFile(alerts []string) {
 		}
 	}
 
-	// TODO remove trailling spaces inside file (not beginning and end of file)
 	output := strings.Join(lines, "\n")
 	err = ioutil.WriteFile(PATH_TO_WANTED_ARTICLES_FILE, []byte(output), 0644)
 	if err != nil {

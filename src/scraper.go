@@ -36,7 +36,7 @@ type article struct {
 func scrape_website(website website, hot bool) []article {
 	soup.Headers["user-agent"] = USER_AGENT_HEADER
 	url := ""
-	fmt.Println("Scrapping website " + website.title)
+	fmt.Println(website.title)
 	if hot {
 		url = website.hotUrl
 	} else {
@@ -56,7 +56,7 @@ func scrape_website(website website, hot bool) []article {
 	if articles == nil || articlesLen == 0 {
 		fmt.Print("No article found. The page has changed ?")
 	} else {
-		fmt.Printf("Found %d articles.\n", articlesLen)
+		fmt.Printf("Scrapped %d articles.\n", articlesLen)
 	}
 
 	articlesToSend := []article{}
@@ -108,6 +108,7 @@ func getWantedArticles() (lines []string){
 	if err != nil {
 		log.Fatal(err)
 	}
+
 	return lines
 }
 
@@ -119,7 +120,7 @@ func scrape_wanted(website website) []article {
 
 	for _, article := range articles {
 		for _, item := range itemsWanted {
-			if strings.Contains(article.title, item) {
+			if len(item) != 0 && strings.Contains(strings.ToLower(article.title), strings.ToLower(item)) {
 				wantedArticles = append(wantedArticles, article)
 			}
 		}
