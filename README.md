@@ -23,5 +23,7 @@ Change the token to fit with yours in `main.go` :
 	Token:  "672292993:AAEY5S2ETZcc1_tCUMEPqE4GnshRwtLp3PM"
 ```
 
+Warning : Don't try to use this one, this is an obsolete one...
+
 - go build src/*
 - ./main
